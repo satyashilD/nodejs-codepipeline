@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - aws ecr get-login-password --region $ECR_REGION | docker login --username AWS --password-stdin $ECR_REPO_URI
+      - REPOSITORY_URI=$ECR_REPO_URI
+      - IMAGE_TAG=buildimage
+      - echo npm install started on `date`
+      - npm install
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker images...
+      - docker build . -t node-web-app
+      - docker tag node-web-app:latest $REPOSITORY_URI:node-web-app
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:node-web-app
+      - printf '[{"name":"nodejs","imageUri":"%s"}]' $REPOSITORY_URI:node-web-app >> imagedefinitions.json
+artifacts:
+  files: imagedefinitions.json
