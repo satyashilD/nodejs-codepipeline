@@ -12,15 +12,16 @@ phases:
       - npm install
   build:
     commands:
+      - IMAGE_NAME=node-web-app-$GIT_BRANCH_NAME
       - echo Build started on `date`
       - echo Building the Docker images...
-      - docker build . -t node-web-app
-      - docker tag node-web-app:latest $REPOSITORY_URI:node-web-app
+      - docker build . -t $IMAGE_NAME
+      - docker tag $IMAGE_NAME:latest $REPOSITORY_URI:$IMAGE_NAME
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
-      - docker push $REPOSITORY_URI:node-web-app
-      - printf '[{"name":"nodejs","imageUri":"%s"}]' $REPOSITORY_URI:node-web-app >> imagedefinitions.json
+      - docker push $REPOSITORY_URI:$IMAGE_NAME
+      - printf '[{"name":"nodejs","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_NAME >> imagedefinitions.json
 artifacts:
   files: imagedefinitions.json
